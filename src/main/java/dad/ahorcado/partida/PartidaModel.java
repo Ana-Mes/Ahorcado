@@ -1,8 +1,10 @@
 package dad.ahorcado.partida;
 
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleListProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -23,14 +25,7 @@ public class PartidaModel {
 	private int posicionJugador;
 	private int fallos = 0;
 	private String palabra = "";
-//	private Jugador jugador;
-	
-//	public Jugador getJugador() {
-//		return jugador;
-//	}
-//	public void setJugador(Jugador jugador) {
-//		this.jugador = jugador;
-//	}
+
 	
 	public int getPosicionJugador() {
 		return posicionJugador;
@@ -120,6 +115,5 @@ public class PartidaModel {
 	public final void setJugador(final Jugador jugador) {
 		this.jugadorProperty().set(jugador);
 	}
-	
-	
+		
 }

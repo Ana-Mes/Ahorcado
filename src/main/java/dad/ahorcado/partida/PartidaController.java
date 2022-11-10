@@ -112,15 +112,18 @@ public class PartidaController implements Initializable {
 			alert.setContentText("Has perdido, pero puedes continuar jugando si lo deseas");
 			alert.showAndWait();
 
-			partidaModel.setFallos(0);
-			comprobarFallos();
 			seleccionarPalabra();
 			partidaModel.setLetrasDescubiertas(null);
 			letras = "";
+			partidaModel.setPuntos(0);
+			partidaModel.setFallos(0);
+			comprobarFallos();
+			
 		}
 	}
 
 	public void seleccionarPalabra() {
+		System.out.println(partidaModel.getJugadoresList());
 		
 		if(partidaModel.getPalabras().size() > 0) {
 			int num = random.nextInt(partidaModel.getPalabras().size());
@@ -197,6 +200,7 @@ public class PartidaController implements Initializable {
 			
 		}
 	}
+
 	public void actualizarPuntos() {
 		partidaModel.getJugadoresList().get(partidaModel.getPosicionJugador()).setPuntuacion(partidaModel.getPuntos());
 	}

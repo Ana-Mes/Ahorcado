@@ -69,12 +69,14 @@ public class RootController implements Initializable {
 		
 		// bindings
 
-		palabrasController.palabrasProperty().bindBidirectional(palabras);
+		palabrasController.palabrasProperty().bind(palabras);
 		partidaController.getPartidaModel().palabrasProperty().bind(palabras);
 		
-		partidaController.getPartidaModel().jugadoresListProperty().bindBidirectional(jugadoresList);
+		partidaController.getPartidaModel().jugadoresListProperty().bind(jugadoresList);
 		puntosController.jugadoresListProperty().bind(jugadoresList);
 
+		// primeras acciones
+		
 		partidaController.seleccionarPalabra();
 		partidaController.meterUsuario();
 
