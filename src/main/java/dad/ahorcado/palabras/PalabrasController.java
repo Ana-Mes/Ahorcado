@@ -15,10 +15,13 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextInputDialog;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.Region;
 
 public class PalabrasController implements Initializable {
 
@@ -45,7 +48,13 @@ public class PalabrasController implements Initializable {
 			loader.setController(this);
 			loader.load();
 		} catch (IOException e) {
-			throw new RuntimeException(e);
+			Alert alert = new Alert(AlertType.ERROR);
+			alert.setTitle("Error");
+			alert.setHeaderText("Ha ocurrido un error");
+			alert.setContentText(e.getLocalizedMessage());
+			alert.getDialogPane().setMinHeight(Region.USE_PREF_SIZE);
+			alert.showAndWait();
+			e.printStackTrace();
 		}
 	}
 
@@ -84,8 +93,8 @@ public class PalabrasController implements Initializable {
 		dialog.setHeaderText("Añadir una nueva palabra");
 		dialog.setContentText("Palabra:");
 		Optional<String> result = dialog.showAndWait();
-		if (result.isPresent() && !palabras.contains(result.get().toUpperCase())) {
-			palabras.add(result.get().toUpperCase());
+		if (result.isPresent() && !palabras.contains(result.get().trim().toUpperCase())) {
+			palabras.add(result.get().trim().toUpperCase());
 		}
 
 	}

@@ -16,8 +16,11 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
+import javafx.scene.layout.Region;
 
 public class RootController implements Initializable {
 
@@ -56,7 +59,14 @@ public class RootController implements Initializable {
 			loader.setController(this);
 			loader.load();
 		} catch (IOException e) {
-			throw new RuntimeException(e);
+			Alert alert = new Alert(AlertType.ERROR);
+			alert.setTitle("Error");
+			alert.setHeaderText("Ha ocurrido un error");
+			alert.setContentText(e.getLocalizedMessage());
+			alert.getDialogPane().setMinHeight(Region.USE_PREF_SIZE);
+			alert.showAndWait();
+			AhorcadoApp.primaryStage.close();
+			e.printStackTrace();
 		}
 	}
 
@@ -71,15 +81,13 @@ public class RootController implements Initializable {
 
 		palabrasController.palabrasProperty().bind(palabras);
 		partidaController.getPartidaModel().palabrasProperty().bind(palabras);
-		
-		partidaController.getPartidaModel().jugadoresListProperty().bind(jugadoresList);
+		partidaController.getPartidaModel().jugadoresListProperty().bindBidirectional(jugadoresList);
 		puntosController.jugadoresListProperty().bind(jugadoresList);
 
 		// primeras acciones
 		
 		partidaController.seleccionarPalabra();
-		partidaController.meterUsuario();
-
+		
 	}
 
 	public TabPane getView() {

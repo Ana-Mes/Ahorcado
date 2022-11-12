@@ -20,6 +20,7 @@ import javafx.scene.control.Alert.AlertType;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.Region;
 
 public class PartidaController implements Initializable {
 	
@@ -65,7 +66,14 @@ public class PartidaController implements Initializable {
 			loader.setController(this);
 			loader.load();
 		} catch (IOException e) {
-			throw new RuntimeException(e);
+			Alert alert = new Alert(AlertType.ERROR);
+			alert.setTitle("Error");
+			alert.setHeaderText("Ha ocurrido un error");
+			alert.setContentText(e.getLocalizedMessage());
+			alert.getDialogPane().setMinHeight(Region.USE_PREF_SIZE);
+			alert.showAndWait();
+			AhorcadoApp.primaryStage.close();
+			e.printStackTrace();
 		}
 	}
 
@@ -106,28 +114,28 @@ public class PartidaController implements Initializable {
 		} else if (partidaModel.getFallos() == 8) {
 			ahorcadoImagen.setImage(new Image("/imagenes/9.png"));
 
-			Alert alert = new Alert(AlertType.INFORMATION);
+			Alert alert = new Alert(AlertType.ERROR);
 			alert.setTitle("Fin");
 			alert.setHeaderText("Partida perdida");
 			alert.setContentText("Has perdido, pero puedes continuar jugando si lo deseas");
 			alert.showAndWait();
 
+			meterPuntuacion();
 			seleccionarPalabra();
 			partidaModel.setLetrasDescubiertas(null);
 			letras = "";
-			partidaModel.setPuntos(0);
 			partidaModel.setFallos(0);
 			comprobarFallos();
+			
 			
 		}
 	}
 
 	public void seleccionarPalabra() {
-		System.out.println(partidaModel.getJugadoresList());
 		
 		if(partidaModel.getPalabras().size() > 0) {
 			int num = random.nextInt(partidaModel.getPalabras().size());
-			partidaModel.setPalabra(partidaModel.palabrasProperty().valueAt(num).get());
+			partidaModel.setPalabra(partidaModel.palabrasProperty().valueAt(num).get().trim());
 			partidaModel.setPalabra(quitarTildes(partidaModel.getPalabra()));
 			partidaModel.setLetrasDescubiertas(null);
 			letras = "";
@@ -149,6 +157,16 @@ public class PartidaController implements Initializable {
 			alert.setContentText("Por favor, introduzca una palabra");
 			alert.showAndWait();
 			
+			TextInputDialog dialog = new TextInputDialog();
+			dialog.setTitle("Nueva palabra");
+			dialog.setHeaderText("Añadir una nueva palabra");
+			dialog.setContentText("Palabra:");
+			Optional<String> result = dialog.showAndWait();
+			if (result.isPresent() && !partidaModel.getPalabras().contains(result.get().trim().toUpperCase())) {
+				partidaModel.getPalabras().add(result.get().trim().toUpperCase());
+			}
+			seleccionarPalabra();
+			
 		}
 		
 	}
@@ -169,11 +187,11 @@ public class PartidaController implements Initializable {
 		this.partidaModel = partidaModel;
 	}
 	
-	public void meterUsuario() {
+	public void meterPuntuacion() {
 		TextInputDialog dialog = new TextInputDialog();
 		dialog.initOwner(AhorcadoApp.primaryStage);
-		dialog.setTitle("Jugador");
-		dialog.setHeaderText("Escribe tu nombre");
+		dialog.setTitle("Guardar puntos");
+		dialog.setHeaderText("Escribe tu nombre para guardar la puntuación");
 		dialog.setContentText("Nombre:");
 		Optional<String> name = dialog.showAndWait();
 
@@ -186,34 +204,36 @@ public class PartidaController implements Initializable {
 				if(!partidaModel.getJugadoresList().get(i).getNombre().equals(name.get())) {
 					partidaModel.setJugador(new Jugador(name.get(), partidaModel.getPuntos()));
 					partidaModel.getJugadoresList().add(partidaModel.getJugador());
-					partidaModel.setPosicionJugador(partidaModel.getJugadoresList().size()-1);
+
+
 				} else {
 					partidaModel.setJugador(partidaModel.getJugadoresList().get(i));
-					partidaModel.setPuntos(partidaModel.getJugador().getPuntuacion());
-					partidaModel.setPosicionJugador(i);
+					partidaModel.getJugador().setPuntuacion(partidaModel.getPuntos());
+					partidaModel.getJugadoresList().remove(i);
+					partidaModel.getJugadoresList().add(new Jugador(name.get(), partidaModel.getPuntos()));
+
+
 				}
 			} else {
 				partidaModel.setJugador(new Jugador(name.get(), partidaModel.getPuntos()));
 				partidaModel.getJugadoresList().add(partidaModel.getJugador());
-				partidaModel.setPosicionJugador(0);
+
+
 			}
 			
 		}
-	}
-
-	public void actualizarPuntos() {
-		partidaModel.getJugadoresList().get(partidaModel.getPosicionJugador()).setPuntuacion(partidaModel.getPuntos());
+		partidaModel.setPuntos(0);
 	}
 
 	@FXML
 	void onLetraAction(ActionEvent event) {
 		String nuevaPalabra = partidaModel.getPalabraRandom();
 		char[] nuevaPalabraArray = nuevaPalabra.toCharArray();
-		String letra = quitarTildes(textField.getText().toUpperCase());
+		String letra = quitarTildes(textField.getText().trim().toUpperCase());
 
 		if (letras.contains(letra)) {
 
-			Alert alert = new Alert(AlertType.INFORMATION);
+			Alert alert = new Alert(AlertType.ERROR);
 			alert.setTitle("Letra existente");
 			alert.setHeaderText("Ya has introducido la letra " + textField.getText().toUpperCase());
 			alert.setContentText("Inténtalo con otra letra");
@@ -221,13 +241,21 @@ public class PartidaController implements Initializable {
 
 		} else if (textField.getText().length() > 1) {
 
-			Alert alert = new Alert(AlertType.INFORMATION);
+			Alert alert = new Alert(AlertType.ERROR);
 			alert.setTitle("Número incorrecto de letras");
 			alert.setHeaderText("Has introducido más de una letra");
 			alert.setContentText("Por favor, introduzca solamente una letra");
 			alert.showAndWait();
 
-		} else {
+		} else if(letra.equals("")) {
+			Alert alert = new Alert(AlertType.ERROR);
+			alert.setTitle("No hay ninguna letra");
+			alert.setHeaderText("No ha introducido letras");
+			alert.setContentText("Por favor, introduzca una letra");
+			alert.showAndWait();
+		}
+		
+		else {
 
 			letras += letra;
 			partidaModel.setLetrasDescubiertas(letras);
@@ -241,31 +269,39 @@ public class PartidaController implements Initializable {
 				}
 				partidaModel.setPalabraRandom(String.valueOf(nuevaPalabraArray));
 				if (palabraResuelta()) {
+					Alert alert = new Alert(AlertType.INFORMATION);
+					alert.setTitle("Palabra acertada");
+					alert.setHeaderText("Enhorabuena, has acertado la palabra");
+					alert.setContentText("Ahora puedes intentarlo con otra palabra");
+					alert.showAndWait();
 					seleccionarPalabra();
 				}
 			} else {
 				partidaModel.setFallos(partidaModel.getFallos() + 1);
 			}
 			comprobarFallos();
-			actualizarPuntos();
 		}
 		textField.setText(null);
 	}
 
 	@FXML
 	void onResolverAction(ActionEvent event) {
-		if (quitarTildes(textField.getText().toUpperCase()).equals(partidaModel.getPalabra())) {
+		if (quitarTildes(textField.getText().trim().toUpperCase()).equals(partidaModel.getPalabra())) {
 			for (int i = 0; i < partidaModel.getPalabraRandom().length(); i++) {
 				if (partidaModel.getPalabraRandom().charAt(i) == '_') {
 					partidaModel.setPuntos(partidaModel.getPuntos() + 1);
 				}
 			}
+			Alert alert = new Alert(AlertType.INFORMATION);
+			alert.setTitle("Palabra acertada");
+			alert.setHeaderText("Enhorabuena, has acertado la palabra");
+			alert.setContentText("Ahora puedes intentarlo con otra palabra");
+			alert.showAndWait();
 			seleccionarPalabra();
 		} else {
 			partidaModel.setFallos(partidaModel.getFallos() + 1);
 		}
 		comprobarFallos();
-		actualizarPuntos();
 		textField.setText(null);
 	}
 
