@@ -28,6 +28,7 @@ public class PalabrasController implements Initializable {
 	// model
 
 	private ListProperty<String> palabras = new SimpleListProperty<>(FXCollections.observableArrayList());
+	private ListProperty<String> palabrasSorted = new SimpleListProperty<>(palabras.sorted());
 	private StringProperty palabraSeleccionada = new SimpleStringProperty();
 
 	@FXML
@@ -63,7 +64,7 @@ public class PalabrasController implements Initializable {
 
 		// bindings
 
-		palabrasList.itemsProperty().bind(palabras);
+		palabrasList.itemsProperty().bind(palabrasSorted);
 		palabraSeleccionada.bind(palabrasList.getSelectionModel().selectedItemProperty());
 		quitarButton.disableProperty().bind(palabraSeleccionada.isNull());
 
